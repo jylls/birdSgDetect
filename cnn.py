@@ -8,21 +8,20 @@ import tensorflow as tf
 from brian import *
 from scipy.ndimage.filters import gaussian_filter
 
-dataset1=genfromtxt('fmelspecdenoise28280.txt',dtype=float, unpack=True)  
-labelset1=genfromtxt('labelsdelta1.txt', dtype=float,unpack=True) 
+dataset1=genfromtxt('fmel28280.txt',dtype=float, unpack=True)  
+labelset1=genfromtxt('labels0.txt', dtype=float,unpack=True) 
 print mean(dataset1)
 
 
 
-dataset2=genfromtxt('fmelspecdenoise28281.txt',dtype=float, unpack=True)  
-labelset2=genfromtxt('labelsdelta2.txt', dtype=float,unpack=True) 
+dataset2=genfromtxt('fmel28281.txt',dtype=float, unpack=True)  
+labelset2=genfromtxt('labels1.txt', dtype=float,unpack=True) 
 
 
 data1= dataset1.transpose()
 data2= dataset2.transpose()
 
-print data1.shape, data2.shape#, datatest.shape
-
+print data1.shape, data2.shape
 labs1=np.zeros((7690,2))
 labs2=np.zeros((8000,2))
 
@@ -75,24 +74,24 @@ def init_weights(shape):
 
 
 def model(X, w, w2, w3, w4, w_o, p_keep_conv, p_keep_hidden):
-    l1a = tf.nn.relu(tf.nn.conv2d(X, w,                       # l1a shape=(?, 28, 28, 32)
+    l1a = tf.nn.relu(tf.nn.conv2d(X, w,                       
                         strides=[1, 1, 1, 1], padding='SAME'))
-    l1 = tf.nn.max_pool(l1a, ksize=[1, 2, 2, 1],              # l1 shape=(?, 14, 14, 32)
+    l1 = tf.nn.max_pool(l1a, ksize=[1, 2, 2, 1],              
                         strides=[1, 2, 2, 1], padding='SAME')
     l1 = tf.nn.dropout(l1, p_keep_conv)
 
-    l2a = tf.nn.relu(tf.nn.conv2d(l1, w2,                     # l2a shape=(?, 14, 14, 64)
+    l2a = tf.nn.relu(tf.nn.conv2d(l1, w2,              
                         strides=[1, 1, 1, 1], padding='SAME'))
-    l2 = tf.nn.max_pool(l2a, ksize=[1, 2, 2, 1],              # l2 shape=(?, 7, 7, 64)
+    l2 = tf.nn.max_pool(l2a, ksize=[1, 2, 2, 1],             
                         strides=[1, 2, 2, 1], padding='SAME')
     l2 = tf.nn.dropout(l2, p_keep_conv)
     
-    l3a = tf.nn.relu(tf.nn.conv2d(l2, w3,                     # l3a shape=(?, 7, 7, 128)
+    l3a = tf.nn.relu(tf.nn.conv2d(l2, w3,                    
                         strides=[1, 1, 1, 1], padding='SAME'))
-    l3 = tf.nn.max_pool(l3a, ksize=[1, 2, 2, 1],              # l3 shape=(?, 4, 4, 128)
+    l3 = tf.nn.max_pool(l3a, ksize=[1, 2, 2, 1],             
                         strides=[1, 2, 2, 1], padding='SAME')
     
-    l3 = tf.reshape(l3, [-1, w4.get_shape().as_list()[0]])    # reshape to (?, 2048)
+    l3 = tf.reshape(l3, [-1, w4.get_shape().as_list()[0]])    
     l3 = tf.nn.dropout(l3, p_keep_conv)
 
 
@@ -104,18 +103,18 @@ def model(X, w, w2, w3, w4, w_o, p_keep_conv, p_keep_hidden):
 
 
 trX, trY, teX, teY = datatr, labstr, datate, labste
-trX = trX.reshape(-1, 28, 28, 1)  # 28x28x1 input img
-teX = teX.reshape(-1, 28, 28, 1)  # 28x28x1 input img
+trX = trX.reshape(-1, 28, 28, 1)  
+teX = teX.reshape(-1, 28, 28, 1)  
 
 
 X = tf.placeholder("float", [None, 28, 28, 1])
 Y = tf.placeholder("float", [None, 2])
 
-w = init_weights([3, 3, 1, 32])       # 3x3x1 conv, 32 outputs
-w2 = init_weights([3, 3, 32, 64])    # 3x3x32 conv, 64 outputs
-w3 = init_weights([3, 3, 64, 128])    # 3x3x32 conv, 128 outputs
-w4 = init_weights([128 * 4 * 4, 625]) # FC 128 * 4 * 4 inputs, 625 outputs
-w_o = init_weights([625, 2])         # FC 625 inputs, 10 outputs (labels)
+w = init_weights([3, 3, 1, 32])      
+w2 = init_weights([3, 3, 32, 64])    
+w3 = init_weights([3, 3, 64, 128])   
+w4 = init_weights([128 * 4 * 4, 625]) 
+w_o = init_weights([625, 2])         
 
 p_keep_conv = tf.placeholder("float")
 p_keep_hidden = tf.placeholder("float")
