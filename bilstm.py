@@ -12,29 +12,27 @@ import numpy as np
 
 
 
-dataset1=np.genfromtxt('fmelspecdenoise28280.txt',dtype=float, unpack=True)  
-labelset1=np.genfromtxt('labelsdelta1.txt', dtype=float,unpack=True) 
+dataset1=np.genfromtxt('fmel28280.txt',dtype=float, unpack=True)  
+labelset1=np.genfromtxt('label0.txt', dtype=float,unpack=True) 
 
 
 
 
-dataset2=np.genfromtxt('fmelspecdenoise28281.txt',dtype=float, unpack=True)  
-labelset2=np.genfromtxt('labelsdelta2.txt', dtype=float,unpack=True) 
+dataset2=np.genfromtxt('fmel28281.txt',dtype=float, unpack=True)  
+labelset2=np.genfromtxt('label1.txt', dtype=float,unpack=True) 
 
 
 
 
 data1= dataset1.transpose()
-data11=np.fliplr(data1)
+
 
 data2= dataset2.transpose()
-#datatest=datatest.transpose()
-print data1.shape, data2.shape#, datatest.shape
+print data1.shape, data2.shape
 
 labs1=np.zeros((7690,2))
-#labs11=np.zeros((7690,2))
 labs2=np.zeros((8000,2))
-#labs22=np.zeros((8000,2))
+
 
 for i in xrange(7690):
        
@@ -56,20 +54,6 @@ for i in xrange(8000):
         labs2[i,0]=0
         labs2[i,1]=1
 
-'''
-labs11=labs1
-labs22=labs2
-ord=np.random.permutation(7690)
-ord2=np.random.permutation(8000)
-data11=data1[ord]
-data11=data11[0:5000]
-labs11=labs1[ord]
-labs11=labs11[0:5000]
-
-data22=data2[ord2]
-data22=data22[0:5000]
-labs22=labs2[ord2]
-labs22=labs22[0:5000]'''
 
 data=np.concatenate((data1, data2), axis=0)
 print data.shape
@@ -80,12 +64,11 @@ labs=np.concatenate((labs1, labs2), axis=0)
 
 
 
-ord3=np.random.permutation(15690)
-#print ord
-data=data[ord3]
-labs=labs[ord3]
-#labstr=np.concatenate((labs[0:15000], labs11,labs22), axis=0)
-#datatr=np.concatenate((data[0:15000], data11,data22), axis=0)
+ord=np.random.permutation(15690)
+
+data=data[ord]
+labs=labs[ord]
+
 labstr=labs[0:15000]
 datatr=data[0:15000]
 datate=data[15000:15690]
@@ -97,10 +80,10 @@ batch_size = 128
 display_step = 10
 
 # Network Parameters
-n_input = 28 # MNIST data input (img shape: 28*28)
-n_steps = 28 # timesteps
+n_input = 28 
+n_steps = 28 
 n_hidden = 128 # hidden layer num of features
-n_classes = 2 # MNIST total classes (0-9 digits)
+n_classes = 2 
 
 # tf Graph input
 x = tf.placeholder("float", [None, n_steps, n_input])
@@ -108,7 +91,7 @@ y = tf.placeholder("float", [None, n_classes])
 
 # Define weights
 weights = {
-    # Hidden layer weights => 2*n_hidden because of forward + backward cells
+    
     'out': tf.Variable(tf.random_normal([2*n_hidden, n_classes]))
 }
 biases = {
@@ -118,10 +101,7 @@ biases = {
 
 def BiRNN(x, weights, biases):
 
-    # Prepare data shape to match `bidirectional_rnn` function requirements
-    # Current data input shape: (batch_size, n_steps, n_input)
-    # Required shape: 'n_steps' tensors list of shape (batch_size, n_input)
-
+    
     # Permuting batch_size and n_steps
     x = tf.transpose(x, [1, 0, 2])
     # Reshape to (n_steps*batch_size, n_input)
