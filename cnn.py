@@ -8,8 +8,6 @@ import tensorflow as tf
 from brian import *
 from scipy.ndimage.filters import gaussian_filter
 
-
-datatest=genfromtxt('fmel2828test.txt',dtype=float, unpack=True) 
 dataset1=genfromtxt('fmelspecdenoise28280.txt',dtype=float, unpack=True)  
 labelset1=genfromtxt('labelsdelta1.txt', dtype=float,unpack=True) 
 print mean(dataset1)
@@ -20,22 +18,10 @@ dataset2=genfromtxt('fmelspecdenoise28281.txt',dtype=float, unpack=True)
 labelset2=genfromtxt('labelsdelta2.txt', dtype=float,unpack=True) 
 
 
-
-
 data1= dataset1.transpose()
 data2= dataset2.transpose()
 
-
-
-
-
-datatest=datatest.transpose()
 print data1.shape, data2.shape#, datatest.shape
-'''
-data1=dataset1.reshape((1000,28*28))
-data2=data1=dataset2.reshape((1000,28*28))
-print data1.shape'''
-
 
 labs1=np.zeros((7690,2))
 labs2=np.zeros((8000,2))
@@ -68,17 +54,11 @@ labs=np.concatenate((labs1, labs2), axis=0)
 #print labs
 
 
-
 ord=np.random.permutation(15690)
 #print ord
 data=data[ord]
 labs=labs[ord]
-#labsbis=labs[0:15000]
 
-############################################################################
-#labstr=np.concatenate((labs[0:15000],labsbis), axis=0)
-#datatr=np.concatenate((data[0:15000], np.fliplr(data[0:15000])), axis=0)
-###########################################################################
 datatr=data[0:15000]
 labstr=labs[0:15000]
 
@@ -86,9 +66,6 @@ labstr=labs[0:15000]
 datate=data[15000:15690]
 labste=labs[15000:15690]
 
-
-
-print datatr.shape,labstr.shape
 
 batch_size = 128
 test_size=690
@@ -126,10 +103,10 @@ def model(X, w, w2, w3, w4, w_o, p_keep_conv, p_keep_hidden):
     return pyx
 
 
-trX, trY, teX, teY,testX = datatr, labstr, datate, labste,datatest
+trX, trY, teX, teY = datatr, labstr, datate, labste
 trX = trX.reshape(-1, 28, 28, 1)  # 28x28x1 input img
 teX = teX.reshape(-1, 28, 28, 1)  # 28x28x1 input img
-testX=testX.reshape(-1,28,28,1)
+
 
 X = tf.placeholder("float", [None, 28, 28, 1])
 Y = tf.placeholder("float", [None, 2])
@@ -169,8 +146,4 @@ with tf.Session() as sess:
                              sess.run(predict_op, feed_dict={X: teX,
                                                              p_keep_conv: 1.0,
     p_keep_hidden: 1.0})))
-    y_pred = sess.run(predict_op,feed_dict={X: testX, p_keep_conv: 1.0,
-    p_keep_hidden: 1.0})   
-    f1=open('ytestpred2.txt',"a")
-    np.savetxt(f1,y_pred)
-    f1.close()
+    
